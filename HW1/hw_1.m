@@ -200,15 +200,13 @@ FA = 90; % deg
 dfreq = [0 200]; % off resonance
 T1 = 1000; % ms
 T2 = 100; % ms
-zpos = -10:10;
 BW = TBW / tau_RF;
 t = -1:0.01:1; % rf pulse duration (ms)
 t_shift = (0:0.01:2) .* (10 ^ -3); % shift to start from 0 and in (s)
 rf = sinc(BW .* t);
-rf_int = cumsum(t_shift .* rf);
-rf_amp90 = FA / (gammabar * rf_int(end));
+rf_amp90 = FA / (gammabar * sum(rf));
 dt = t(2) - t(1);
-position = -10:10; % position (mm)
+position = -10:0.1:10; % position (mm)
 grad = Gss * ones(1, length(t)) * 10 ^ 3; % mT/m
 grad = [grad -grad(1:2:end)];
 rf90 = zeros(1, length(grad));
@@ -216,7 +214,7 @@ rf90(1:length(t)) = rf_amp90 * sinc(BW .* t);
 
 % simulation
 for k = 1:length(dfreq)
-    M = sliceprofile(T1, T2, rf90 / 10, dt, grad, dfreq(k), position);
+    M = sliceprofile(T1, T2, rf90, dt, grad, dfreq(k), position);
     
     % plot slice profile
     figure;
@@ -269,12 +267,12 @@ ylabel('Gss (mT/m)')
 
 % Question 3.3
 FA = 30; % deg
-rf_amp30 = FA / (gammabar * rf_int(end));
+rf_amp30 = FA / (gammabar * sum(rf));
 rf30 = zeros(1, length(grad));
 rf30(1:length(t)) = rf_amp30 * sinc(BW .* t);
 % simulation
 for k = 1:length(dfreq)
-    M = sliceprofile(T1, T2, rf30 / 10, dt, grad, dfreq(k), position);
+    M = sliceprofile(T1, T2, rf30, dt, grad, dfreq(k), position);
     
     % plot slice profile
     figure;
@@ -299,12 +297,12 @@ for k = 1:length(dfreq)
 end
 
 FA = 10; % deg
-rf_amp10 = FA / (gammabar * rf_int(end));
+rf_amp10 = FA / (gammabar * sum(rf));
 rf10 = zeros(1, length(grad));
 rf10(1:length(t)) = rf_amp10 * sinc(BW .* t);
 % simulation
 for k = 1:length(dfreq)
-    M = sliceprofile(T1, T2, rf10 / 10, dt, grad, dfreq(k), position);
+    M = sliceprofile(T1, T2, rf10, dt, grad, dfreq(k), position);
     
     % plot slice profile
     figure;
@@ -364,8 +362,8 @@ title(tt, 'T2 = 100ms')
 
 % Set T2 = 2
 T2 = 2; % ms
-M90 = sliceprofile(T1, T2, rf90 / 10, dt, grad, 0, position);
-M10 = sliceprofile(T1, T2, rf10 / 10, dt, grad, 0, position);
+M90 = sliceprofile(T1, T2, rf90, dt, grad, 0, position);
+M10 = sliceprofile(T1, T2, rf10, dt, grad, 0, position);
 % overlay w/ FT
 figure;
 tt = tiledlayout(1, 2);
@@ -399,7 +397,7 @@ title(tt, 'T2 = 2ms')
 
 % Question 3.4
 FA = 90;
-M = sliceprofile(T1, T2, rf90(1:length(t)) / 10, dt, grad(1:length(t)), 0, position);
+M = sliceprofile(T1, T2, rf90(1:length(t)), dt, grad(1:length(t)), 0, position);
 
 % plot slice profile
 figure;
@@ -425,15 +423,15 @@ title(tt, {['Off-Resonance = ' num2str(0) 'Hz'], ['FA = ' num2str(FA)]})
 % Question 3.5
 T2 = 100; % ms
 numSlices = 5;
-phaseshift = 0;
-position = -100:100;
+phaseshift = zeros(size(t_shift));
+position = -60:0.1:60;
 slicepos = linspace(-50, 50, numSlices) / 1000;
 for k = 1:numSlices
-    phaseshift = phaseshift + exp(1i * (gammabar * 10 ^ 6 * Gss * slicepos(k) * t));
+    phaseshift = phaseshift + exp(-1i * (gammabar * 10 ^ 6 * Gss * slicepos(k) * t_shift));
 end
 rf_sms = zeros(1, length(grad));
-rf_sms(1:length(t)) = rf_amp90 * sinc(BW * t) .* phaseshift;
-M = sliceprofile(T1, T2, rf_sms / 10, dt, grad, 0, position);
+rf_sms(1:length(t)) = (rf_amp90 * sinc(BW * t)) .* phaseshift;
+M = sliceprofile(T1, T2, rf_sms, dt, grad, 0, position);
 figure;
 tt = tiledlayout(4, 1);
 nexttile;
