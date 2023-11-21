@@ -99,9 +99,9 @@ load('Data_Assignment3_Problem2.mat')
 [imgSize, ~, numCoils] = size(kspaceData);
 I = zeros(imgSize, imgSize, numCoils);
 for k = 1:numCoils
-    I(:, :, k) = ifftshift(ifft2(kspaceData(:, :, k)));
+    I(:, :, k) = conj(coilmaps(:, :, k)) .* ifftshift(ifft2(kspaceData(:, :, k))); % adjusted based on Jiayao's code
 end
-I = sqrt(sum(I, 3));
+I = sum(I, 3);
 
 figure;
 imagesc(abs(I)); axis square; title('Coil Combined Image'); colormap('gray');
@@ -111,9 +111,9 @@ R2k = kspaceData;
 R2k(1:2:end, :, :) = 0;
 IR2 = zeros(imgSize, imgSize, numCoils);
 for k = 1:numCoils
-    IR2(:, :, k) = ifftshift(ifft2(R2k(:, :, k)));
+    IR2(:, :, k) = conj(coilmaps(:, :, k)) .* ifftshift(ifft2(R2k(:, :, k)));
 end
-IR2 = sqrt(sum(IR2, 3));
+IR2 = sum(IR2, 3);
 
 figure;
 imagesc(abs(IR2)); axis square; title('Coil Combined Image R=2'); colormap('gray');
@@ -125,9 +125,9 @@ figure;
 imagesc(abs(IR2_sense)); axis square; title('SENSE Recon R=2'); colormap('gray');
 
 % display difference image
-diffImg = I - IR2_sense;
+diffImg = abs(I) - abs(IR2_sense);
 figure;
-imagesc(abs(diffImg)); axis square; title('Difference SENSE R=2'); colormap('gray');
+imagesc(diffImg); axis square; title('Difference SENSE R=2'); colormap('gray');
 
 %%% Question 2d
 R4k = kspaceData;
@@ -136,9 +136,9 @@ R4k(2:4:end, :, :) = 0;
 R4k(3:4:end, :, :) = 0;
 IR4 = zeros(imgSize, imgSize, numCoils);
 for k = 1:numCoils
-    IR4(:, :, k) = ifftshift(ifft2(R4k(:, :, k)));
+    IR4(:, :, k) = conj(coilmaps(:, :, k)) .* ifftshift(ifft2(R4k(:, :, k)));
 end
-IR4 = sqrt(sum(IR4, 3));
+IR4 = sum(IR4, 3);
 
 figure;
 imagesc(abs(IR4)); axis square; title('Coil Combined Image R=4'); colormap('gray');
@@ -150,9 +150,9 @@ figure;
 imagesc(abs(IR4_sense)); axis square; title('SENSE Recon R=4'); colormap('gray');
 
 % display difference image
-diffImg = I - IR4_sense;
+diffImg = abs(I) - abs(IR4_sense);
 figure;
-imagesc(abs(diffImg)); axis square; title('Difference SENSE R=4'); colormap('gray');
+imagesc(diffImg); axis square; title('Difference SENSE R=4'); colormap('gray');
 
 end
 
