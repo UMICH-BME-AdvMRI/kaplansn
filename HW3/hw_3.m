@@ -99,7 +99,7 @@ load('Data_Assignment3_Problem2.mat')
 [imgSize, ~, numCoils] = size(kspaceData);
 I = zeros(imgSize, imgSize, numCoils);
 for k = 1:numCoils
-    I(:, :, k) = conj(coilmaps(:, :, k)) .* ifftshift(ifft2(kspaceData(:, :, k))); % adjusted based on Jiayao's code
+    I(:, :, k) = conj(coilmaps(:, :, k)) .* ifftshift(ifft2(kspaceData(:, :, k))); % adjusted to be complex conjugate
 end
 I = sum(I, 3);
 
@@ -119,7 +119,7 @@ figure;
 imagesc(abs(IR2)); axis square; title('Coil Combined Image R=2'); colormap('gray');
 
 %%% Question 2c
-IR2_sense = SENSE(R2k, coilmaps, 2);
+IR2_sense = SENSE(R2k, coilmaps, 2) * 2;
 
 figure;
 imagesc(abs(IR2_sense)); axis square; title('SENSE Recon R=2'); colormap('gray');
@@ -144,7 +144,7 @@ figure;
 imagesc(abs(IR4)); axis square; title('Coil Combined Image R=4'); colormap('gray');
 
 % fix mismatched coilmap indices
-IR4_sense = SENSE(R4k, coilmaps, 4);
+IR4_sense = SENSE(R4k, coilmaps, 4) * 4;
 
 figure;
 imagesc(abs(IR4_sense)); axis square; title('SENSE Recon R=4'); colormap('gray');
